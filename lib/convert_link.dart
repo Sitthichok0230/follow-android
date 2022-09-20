@@ -23,7 +23,7 @@ Future<void> makeRequest(bool enable) async {
   if (word.isNotEmpty && enable) {
     await http
         .put(Uri.parse(
-            'https://follow-service.herokuapp.com/api/ranking/${getWord()}'))
+            'https://follow-service.onrender.com/api/ranking/${getWord()}'))
         .then((res) => {
               if (res.statusCode != 200)
                 Fluttertoast.showToast(

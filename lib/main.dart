@@ -74,7 +74,7 @@ class _HomePageWidgetState extends State<HomePageWidget>
       setState(() {
         _sharedText = value;
       });
-      convertUrl(_sharedText ?? 'https://follow-service.herokuapp.com', true);
+      convertUrl(_sharedText ?? 'https://follow-service.onrender.com', true);
       _con.loadUrl(getLink());
     });
   }
@@ -203,7 +203,7 @@ class _HomePageWidgetState extends State<HomePageWidget>
                   PopupMenuItem(
                       child: const Text('หน้าแรก'),
                       onTap: () async {
-                        _con.loadUrl('https://follow-service.herokuapp.com');
+                        _con.loadUrl('https://follow-service.onrender.com');
                         convertUrl((await _con.currentUrl())!, true);
                       }),
                   PopupMenuItem(
@@ -315,7 +315,7 @@ class _HomePageWidgetState extends State<HomePageWidget>
                       (WebViewController webViewController) async {
                     _con = webViewController;
                     convertUrl(
-                        _sharedText ?? 'https://follow-service.herokuapp.com',
+                        _sharedText ?? 'https://follow-service.onrender.com',
                         true);
                     _con.loadUrl(getLink());
                   },
@@ -351,7 +351,7 @@ class _FullscreenDialogState extends State<_FullscreenDialog> {
 
   Future<dynamic> makeRequest() async {
     await http
-        .get(Uri.parse('https://follow-service.herokuapp.com/api/ranking'))
+        .get(Uri.parse('https://follow-service.onrender.com/api/ranking'))
         .then((response) => {
               if (response.statusCode == 200)
                 setState(() {
