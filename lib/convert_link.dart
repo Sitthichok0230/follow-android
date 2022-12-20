@@ -108,8 +108,8 @@ void convertUrl(String url, bool enable) {
       makeRequest(enable);
       break;
     case 'youtube':
-      if (word.contains('c/')) {
-        word = word.substring(2, (word.length));
+      if (word.contains('@')) {
+        word = word.substring(1, (word.length));
       } else if (word.contains('user/')) {
         word = word.substring(5, (word.length));
       } else if (word.contains('tag/')) {

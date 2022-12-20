@@ -97,12 +97,13 @@ class _HomePageWidgetState extends State<HomePageWidget>
   }
 
   Future<void> _navigateAndDisplaySelection(
-      BuildContext context, bool online) async {
+      BuildContext context, String dialogName) async {
     final result = await Navigator.push<String>(
         context,
         MaterialPageRoute<String>(
-          builder: (context) =>
-              online ? const _FullscreenDialog() : const _SavedDialog(),
+          builder: (context) => dialogName == 'word-ranking'
+              ? const _WordRankingDialog()
+              : const _WordSavedDialog(),
           fullscreenDialog: true,
         ));
     if (!mounted) return;
@@ -176,7 +177,7 @@ class _HomePageWidgetState extends State<HomePageWidget>
               size: 25,
             ),
             tooltip: 'มาแรง',
-            onPressed: () => _navigateAndDisplaySelection(context, true),
+            onPressed: () => _navigateAndDisplaySelection(context, 'word-ranking'),
           ),
           IconButton(
             icon: const Icon(
@@ -185,7 +186,7 @@ class _HomePageWidgetState extends State<HomePageWidget>
               size: 25,
             ),
             tooltip: 'คำที่จะค้นหา',
-            onPressed: () => _navigateAndDisplaySelection(context, false),
+            onPressed: () => _navigateAndDisplaySelection(context, 'word-saved'),
           ),
           IconButton(
             icon: const Icon(
@@ -238,8 +239,9 @@ class _HomePageWidgetState extends State<HomePageWidget>
                     tooltip: 'Google',
                     onPressed: () async {
                       convertUrl((await _con.currentUrl())!, true);
-                      _con.loadUrl(
-                          'https://www.google.com/search?q=${getWord()}');
+                      _con.loadUrl(getWord() != ''
+                          ? 'https://www.google.com/search?q=${getWord()}'
+                          : 'https://www.google.com');
                     },
                   ),
                   IconButton(
@@ -251,8 +253,9 @@ class _HomePageWidgetState extends State<HomePageWidget>
                     tooltip: 'Facebook',
                     onPressed: () async {
                       convertUrl((await _con.currentUrl())!, true);
-                      _con.loadUrl(
-                          'https://m.facebook.com/hashtag/${getWord()}');
+                      _con.loadUrl(getWord() != ''
+                          ? 'https://m.facebook.com/hashtag/${getWord()}'
+                          : 'https://m.facebook.com');
                     },
                   ),
                   IconButton(
@@ -264,8 +267,9 @@ class _HomePageWidgetState extends State<HomePageWidget>
                     tooltip: 'Twitter',
                     onPressed: () async {
                       convertUrl((await _con.currentUrl())!, true);
-                      _con.loadUrl(
-                          'https://mobile.twitter.com/search?q=${getWord()}');
+                      _con.loadUrl(getWord() != ''
+                          ? 'https://mobile.twitter.com/search?q=${getWord()}'
+                          : 'https://mobile.twitter.com');
                     },
                   ),
                   IconButton(
@@ -277,8 +281,9 @@ class _HomePageWidgetState extends State<HomePageWidget>
                     tooltip: 'Instagram',
                     onPressed: () async {
                       convertUrl((await _con.currentUrl())!, true);
-                      _con.loadUrl(
-                          'https://www.instagram.com/explore/tags/${getWord()}');
+                      _con.loadUrl(getWord() != ''
+                          ? 'https://www.instagram.com/explore/tags/${getWord()}'
+                          : 'https://www.instagram.com');
                     },
                   ),
                   IconButton(
@@ -290,8 +295,9 @@ class _HomePageWidgetState extends State<HomePageWidget>
                     tooltip: 'YouTube',
                     onPressed: () async {
                       convertUrl((await _con.currentUrl())!, true);
-                      _con.loadUrl(
-                          'https://m.youtube.com/results?search_query=${getWord()}');
+                      _con.loadUrl(getWord() != ''
+                          ? 'https://m.youtube.com/results?search_query=${getWord()}'
+                          : 'https://m.youtube.com');
                     },
                   ),
                   IconButton(
@@ -303,7 +309,9 @@ class _HomePageWidgetState extends State<HomePageWidget>
                     tooltip: 'TikTok',
                     onPressed: () async {
                       convertUrl((await _con.currentUrl())!, true);
-                      _con.loadUrl('https://www.tiktok.com/tag/${getWord()}');
+                      _con.loadUrl(getWord() != ''
+                          ? 'https://www.tiktok.com/tag/${getWord()}'
+                          : 'https://www.tiktok.com');
                     },
                   ),
                 ],
@@ -329,14 +337,14 @@ class _HomePageWidgetState extends State<HomePageWidget>
   }
 }
 
-class _FullscreenDialog extends StatefulWidget {
-  const _FullscreenDialog({Key? key}) : super(key: key);
+class _WordRankingDialog extends StatefulWidget {
+  const _WordRankingDialog({Key? key}) : super(key: key);
 
   @override
-  _FullscreenDialogState createState() => _FullscreenDialogState();
+  _WordRankingDialogState createState() => _WordRankingDialogState();
 }
 
-class _FullscreenDialogState extends State<_FullscreenDialog> {
+class _WordRankingDialogState extends State<_WordRankingDialog> {
   var data = [];
 
   @override
@@ -401,14 +409,14 @@ class _FullscreenDialogState extends State<_FullscreenDialog> {
   }
 }
 
-class _SavedDialog extends StatefulWidget {
-  const _SavedDialog({Key? key}) : super(key: key);
+class _WordSavedDialog extends StatefulWidget {
+  const _WordSavedDialog({Key? key}) : super(key: key);
 
   @override
-  _SavedDialogState createState() => _SavedDialogState();
+  _WordSavedDialogState createState() => _WordSavedDialogState();
 }
 
-class _SavedDialogState extends State<_SavedDialog> {
+class _WordSavedDialogState extends State<_WordSavedDialog> {
   List<String> data = [];
 
   @override
