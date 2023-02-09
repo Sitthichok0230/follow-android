@@ -5,7 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 
 final regex = RegExp(
-    r'[(http(s)?):\/\/(www\.)]*?([a-zA-Z0-9@:%_\+~#=]{2,256})\.[a-z]{2,6}\/\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)');
+    r'[(http(s)?):\/\/(www\.)]*?([a-zA-Z0-9@:%_\+~#=]{2,256}\.[a-z(\.a-z)]{2,7})\/\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)');
 
 String link = "";
 String word = "";
@@ -64,7 +64,7 @@ void convertUrl(String url, bool enable) {
   }
 
   switch (service) {
-    case 'thailandsuperstar':
+    case 'thailandsuperstar.com':
       if (word.contains('profile/')) {
         word = word
             .substring((word.lastIndexOf('/')) + 1, (word.length))
@@ -78,7 +78,7 @@ void convertUrl(String url, bool enable) {
       }
       makeRequest(enable);
       break;
-    case 'google':
+    case 'google.com':
       if (word.contains('q=') && word.contains('&')) {
         word = word.substring((word.indexOf('q=')) + 2, (word.indexOf('&')));
       } else if (word.contains('q=')) {
@@ -88,7 +88,7 @@ void convertUrl(String url, bool enable) {
       }
       makeRequest(enable);
       break;
-    case 'facebook':
+    case 'facebook.com':
       if (word.contains('people/')) {
         word = word.substring(7, (word.length));
       } else if (word.contains('groups/')) {
@@ -107,7 +107,7 @@ void convertUrl(String url, bool enable) {
       word = word.replaceAll(RegExp(r'-'), ' ');
       makeRequest(enable);
       break;
-    case 'youtube':
+    case 'youtube.com':
       if (word.contains('@')) {
         word = word.substring(1, (word.length));
       } else if (word.contains('user/')) {
@@ -122,7 +122,7 @@ void convertUrl(String url, bool enable) {
       filterPath();
       makeRequest(enable);
       break;
-    case 'instagram':
+    case 'instagram.com':
       if (word.contains('tags/')) {
         word = word.substring((word.indexOf('tags/')) + 5, (word.length));
       } else if (word.contains('login/')) {
@@ -133,7 +133,7 @@ void convertUrl(String url, bool enable) {
       filterPath();
       makeRequest(enable);
       break;
-    case 'twitter':
+    case 'twitter.com':
       if (word.contains('q=') && word.contains('&')) {
         word = word.substring((word.indexOf('=')) + 1, (word.indexOf('&')));
       } else if (word.contains('q=')) {
@@ -148,7 +148,7 @@ void convertUrl(String url, bool enable) {
       filterPath();
       makeRequest(enable);
       break;
-    case 'tiktok':
+    case 'tiktok.com':
       url = link;
       if (word.contains('q=')) {
         word = word.substring((word.indexOf('q=')) + 2, (word.length));
