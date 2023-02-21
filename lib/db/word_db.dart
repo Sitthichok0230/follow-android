@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:follow/models/word_model.dart';
+import 'package:follow/models/word.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 

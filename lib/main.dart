@@ -6,9 +6,9 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:follow/convert_link.dart';
+import 'package:follow/url_converter.dart';
 import 'package:follow/db/word_db.dart';
-import 'package:follow/models/word_model.dart';
+import 'package:follow/models/word.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -74,8 +74,8 @@ class _HomePageWidgetState extends State<HomePageWidget>
       setState(() {
         _sharedText = value;
       });
-      convertUrl(_sharedText ?? 'https://follow-service.onrender.com', true);
-      _con.loadUrl(getLink());
+      UrlConverter.convertUrl(_sharedText ?? 'https://follow-service.onrender.com', true);
+      _con.loadUrl(UrlConverter.link);
     });
   }
 
@@ -108,14 +108,14 @@ class _HomePageWidgetState extends State<HomePageWidget>
         ));
     if (!mounted) return;
     _con.loadUrl('https://www.google.com/search?q=${result!}');
-    convertUrl((await _con.currentUrl())!, true);
+    UrlConverter.convertUrl((await _con.currentUrl())!, true);
   }
 
   Stream<dynamic> getCurrentUrl() async* {
     await Future.delayed(const Duration(seconds: 2));
     while (true) {
-      convertUrl((await _con.currentUrl())!, false);
-      yield await WordDatabase.haveWord(getWord());
+      UrlConverter.convertUrl((await _con.currentUrl())!, false);
+      yield await WordDatabase.haveWord(UrlConverter.getWordUrlDecode());
     }
   }
 
@@ -148,7 +148,7 @@ class _HomePageWidgetState extends State<HomePageWidget>
                       ),
                       tooltip: 'ลบ',
                       onPressed: () async {
-                        await WordDatabase.deleteWord(getWord());
+                        await WordDatabase.deleteWord(UrlConverter.getWordUrlDecode());
                         _showToast('ลบแล้ว');
                       });
                 } else {
@@ -160,8 +160,8 @@ class _HomePageWidgetState extends State<HomePageWidget>
                     ),
                     tooltip: 'เพิ่ม',
                     onPressed: () async {
-                      if (getWord().isNotEmpty) {
-                        await WordDatabase.insertWord(Word(word: getWord()));
+                      if (UrlConverter.getWordUrlDecode().isNotEmpty) {
+                        await WordDatabase.insertWord(Word(word: UrlConverter.getWordUrlDecode()));
                         _showToast('เพิ่มแล้ว');
                       } else {
                         _showToast('เพิ่มไม่ได้');
@@ -205,7 +205,7 @@ class _HomePageWidgetState extends State<HomePageWidget>
                       child: const Text('หน้าแรก'),
                       onTap: () async {
                         _con.loadUrl('https://follow-service.onrender.com');
-                        convertUrl((await _con.currentUrl())!, true);
+                        UrlConverter.convertUrl((await _con.currentUrl())!, true);
                       }),
                   PopupMenuItem(
                       child: const Text('ล้างคุกกี้'),
@@ -238,9 +238,9 @@ class _HomePageWidgetState extends State<HomePageWidget>
                     ),
                     tooltip: 'Google',
                     onPressed: () async {
-                      convertUrl((await _con.currentUrl())!, true);
-                      _con.loadUrl(getWord() != ''
-                          ? 'https://www.google.com/search?q=${getWord()}'
+                      UrlConverter.convertUrl((await _con.currentUrl())!, true);
+                      _con.loadUrl(UrlConverter.getWordUrlDecode() != ''
+                          ? 'https://www.google.com/search?q=${UrlConverter.getWordUrlDecode()}'
                           : 'https://www.google.com');
                     },
                   ),
@@ -252,9 +252,9 @@ class _HomePageWidgetState extends State<HomePageWidget>
                     ),
                     tooltip: 'Facebook',
                     onPressed: () async {
-                      convertUrl((await _con.currentUrl())!, true);
-                      _con.loadUrl(getWord() != ''
-                          ? 'https://m.facebook.com/hashtag/${getWord()}'
+                      UrlConverter.convertUrl((await _con.currentUrl())!, true);
+                      _con.loadUrl(UrlConverter.getWordUrlDecode() != ''
+                          ? 'https://m.facebook.com/hashtag/${UrlConverter.getWordUrlDecode()}'
                           : 'https://m.facebook.com');
                     },
                   ),
@@ -266,9 +266,9 @@ class _HomePageWidgetState extends State<HomePageWidget>
                     ),
                     tooltip: 'Twitter',
                     onPressed: () async {
-                      convertUrl((await _con.currentUrl())!, true);
-                      _con.loadUrl(getWord() != ''
-                          ? 'https://mobile.twitter.com/search?q=${getWord()}'
+                      UrlConverter.convertUrl((await _con.currentUrl())!, true);
+                      _con.loadUrl(UrlConverter.getWordUrlDecode() != ''
+                          ? 'https://mobile.twitter.com/search?q=${UrlConverter.getWordUrlDecode()}'
                           : 'https://mobile.twitter.com');
                     },
                   ),
@@ -280,9 +280,9 @@ class _HomePageWidgetState extends State<HomePageWidget>
                     ),
                     tooltip: 'Instagram',
                     onPressed: () async {
-                      convertUrl((await _con.currentUrl())!, true);
-                      _con.loadUrl(getWord() != ''
-                          ? 'https://www.instagram.com/explore/tags/${getWord()}'
+                      UrlConverter.convertUrl((await _con.currentUrl())!, true);
+                      _con.loadUrl(UrlConverter.getWordUrlDecode() != ''
+                          ? 'https://www.instagram.com/explore/tags/${UrlConverter.getWordUrlDecode()}'
                           : 'https://www.instagram.com');
                     },
                   ),
@@ -294,9 +294,9 @@ class _HomePageWidgetState extends State<HomePageWidget>
                     ),
                     tooltip: 'YouTube',
                     onPressed: () async {
-                      convertUrl((await _con.currentUrl())!, true);
-                      _con.loadUrl(getWord() != ''
-                          ? 'https://m.youtube.com/results?search_query=${getWord()}'
+                      UrlConverter.convertUrl((await _con.currentUrl())!, true);
+                      _con.loadUrl(UrlConverter.getWordUrlDecode() != ''
+                          ? 'https://m.youtube.com/results?search_query=${UrlConverter.getWordUrlDecode()}'
                           : 'https://m.youtube.com');
                     },
                   ),
@@ -308,9 +308,9 @@ class _HomePageWidgetState extends State<HomePageWidget>
                     ),
                     tooltip: 'TikTok',
                     onPressed: () async {
-                      convertUrl((await _con.currentUrl())!, true);
-                      _con.loadUrl(getWord() != ''
-                          ? 'https://www.tiktok.com/tag/${getWord()}'
+                      UrlConverter.convertUrl((await _con.currentUrl())!, true);
+                      _con.loadUrl(UrlConverter.getWordUrlDecode() != ''
+                          ? 'https://www.tiktok.com/tag/${UrlConverter.getWordUrlDecode()}'
                           : 'https://www.tiktok.com');
                     },
                   ),
@@ -322,10 +322,10 @@ class _HomePageWidgetState extends State<HomePageWidget>
                   onWebViewCreated:
                       (WebViewController webViewController) async {
                     _con = webViewController;
-                    convertUrl(
+                    UrlConverter.convertUrl(
                         _sharedText ?? 'https://follow-service.onrender.com',
                         true);
-                    _con.loadUrl(getLink());
+                    _con.loadUrl(UrlConverter.link);
                   },
                 ),
               ),
