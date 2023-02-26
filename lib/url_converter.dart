@@ -19,7 +19,7 @@ class UrlConverter {
     if (word.isNotEmpty && enable) {
       await http
           .put(Uri.parse(
-              'https://follow-service.onrender.com/api/ranking/${getWordUrlDecode()}'))
+              'http://follow.cloudns.ph/api/ranking/${getWordUrlDecode()}'))
           .then((res) => {
                 if (res.statusCode != 200)
                   Fluttertoast.showToast(

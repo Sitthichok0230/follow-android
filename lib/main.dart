@@ -74,7 +74,7 @@ class _HomePageWidgetState extends State<HomePageWidget>
       setState(() {
         _sharedText = value;
       });
-      UrlConverter.convertUrl(_sharedText ?? 'https://follow-service.onrender.com', true);
+      UrlConverter.convertUrl(_sharedText ?? 'http://follow.cloudns.ph', true);
       _con.loadUrl(UrlConverter.link);
     });
   }
@@ -204,7 +204,7 @@ class _HomePageWidgetState extends State<HomePageWidget>
                   PopupMenuItem(
                       child: const Text('หน้าแรก'),
                       onTap: () async {
-                        _con.loadUrl('https://follow-service.onrender.com');
+                        _con.loadUrl('http://follow.cloudns.ph');
                         UrlConverter.convertUrl((await _con.currentUrl())!, true);
                       }),
                   PopupMenuItem(
@@ -323,7 +323,7 @@ class _HomePageWidgetState extends State<HomePageWidget>
                       (WebViewController webViewController) async {
                     _con = webViewController;
                     UrlConverter.convertUrl(
-                        _sharedText ?? 'https://follow-service.onrender.com',
+                        _sharedText ?? 'http://follow.cloudns.ph',
                         true);
                     _con.loadUrl(UrlConverter.link);
                   },
@@ -359,7 +359,7 @@ class _WordRankingDialogState extends State<_WordRankingDialog> {
 
   Future<dynamic> makeRequest() async {
     await http
-        .get(Uri.parse('https://follow-service.onrender.com/api/ranking'))
+        .get(Uri.parse('http://follow.cloudns.ph/api/ranking'))
         .then((response) => {
               if (response.statusCode == 200)
                 setState(() {
