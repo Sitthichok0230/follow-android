@@ -54,6 +54,7 @@ class _HomePageWidgetState extends State<HomePageWidget>
   final CookieManager? cookieManager = CookieManager();
   late StreamSubscription _intentDataStreamSubscription;
   String? _sharedText;
+  List<String> words = [];
 
   @override
   void initState() {
@@ -74,7 +75,8 @@ class _HomePageWidgetState extends State<HomePageWidget>
       setState(() {
         _sharedText = value;
       });
-      UrlConverter.convertUrl(_sharedText ?? 'http://follow.cloudns.ph', true);
+      UrlConverter.convertUrl(
+          _sharedText ?? 'https://follow-service.onrender.com/', true);
       _con.loadUrl(UrlConverter.link);
     });
   }
@@ -119,6 +121,14 @@ class _HomePageWidgetState extends State<HomePageWidget>
     }
   }
 
+  void addWord(String word) {
+    setState(() {
+      if (!words.contains(word) && word.isNotEmpty) {
+        words.add(word);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -148,7 +158,8 @@ class _HomePageWidgetState extends State<HomePageWidget>
                       ),
                       tooltip: 'ลบ',
                       onPressed: () async {
-                        await WordDatabase.deleteWord(UrlConverter.getWordUrlDecode());
+                        await WordDatabase.deleteWord(
+                            UrlConverter.getWordUrlDecode());
                         _showToast('ลบแล้ว');
                       });
                 } else {
@@ -161,7 +172,8 @@ class _HomePageWidgetState extends State<HomePageWidget>
                     tooltip: 'เพิ่ม',
                     onPressed: () async {
                       if (UrlConverter.getWordUrlDecode().isNotEmpty) {
-                        await WordDatabase.insertWord(Word(word: UrlConverter.getWordUrlDecode()));
+                        await WordDatabase.insertWord(
+                            Word(word: UrlConverter.getWordUrlDecode()));
                         _showToast('เพิ่มแล้ว');
                       } else {
                         _showToast('เพิ่มไม่ได้');
@@ -177,7 +189,8 @@ class _HomePageWidgetState extends State<HomePageWidget>
               size: 25,
             ),
             tooltip: 'มาแรง',
-            onPressed: () => _navigateAndDisplaySelection(context, 'word-ranking'),
+            onPressed: () =>
+                _navigateAndDisplaySelection(context, 'word-ranking'),
           ),
           IconButton(
             icon: const Icon(
@@ -186,7 +199,8 @@ class _HomePageWidgetState extends State<HomePageWidget>
               size: 25,
             ),
             tooltip: 'คำที่จะค้นหา',
-            onPressed: () => _navigateAndDisplaySelection(context, 'word-saved'),
+            onPressed: () =>
+                _navigateAndDisplaySelection(context, 'word-saved'),
           ),
           IconButton(
             icon: const Icon(
@@ -204,8 +218,12 @@ class _HomePageWidgetState extends State<HomePageWidget>
                   PopupMenuItem(
                       child: const Text('หน้าแรก'),
                       onTap: () async {
-                        _con.loadUrl('http://follow.cloudns.ph');
-                        UrlConverter.convertUrl((await _con.currentUrl())!, true);
+                        _con.loadUrl(words.isNotEmpty
+                            ? 'https://you.com/search?q=แนะนำลิงก์เนื้อหาเว็บไซต์ภาษาไทยหรืออังกฤษที่เกี่ยวข้องกับ $words&tbm=youchat'
+                            : 'https://follow-service.onrender.com/');
+                        words.clear();
+                        UrlConverter.convertUrl(
+                            (await _con.currentUrl())!, true);
                       }),
                   PopupMenuItem(
                       child: const Text('ล้างคุกกี้'),
@@ -239,6 +257,7 @@ class _HomePageWidgetState extends State<HomePageWidget>
                     tooltip: 'Google',
                     onPressed: () async {
                       UrlConverter.convertUrl((await _con.currentUrl())!, true);
+                      addWord(UrlConverter.getWordUrlDecode());
                       _con.loadUrl(UrlConverter.getWordUrlDecode() != ''
                           ? 'https://www.google.com/search?q=${UrlConverter.getWordUrlDecode()}'
                           : 'https://www.google.com');
@@ -253,6 +272,7 @@ class _HomePageWidgetState extends State<HomePageWidget>
                     tooltip: 'Facebook',
                     onPressed: () async {
                       UrlConverter.convertUrl((await _con.currentUrl())!, true);
+                      addWord(UrlConverter.getWordUrlDecode());
                       _con.loadUrl(UrlConverter.getWordUrlDecode() != ''
                           ? 'https://m.facebook.com/hashtag/${UrlConverter.getWordUrlDecode()}'
                           : 'https://m.facebook.com');
@@ -267,6 +287,7 @@ class _HomePageWidgetState extends State<HomePageWidget>
                     tooltip: 'Twitter',
                     onPressed: () async {
                       UrlConverter.convertUrl((await _con.currentUrl())!, true);
+                      addWord(UrlConverter.getWordUrlDecode());
                       _con.loadUrl(UrlConverter.getWordUrlDecode() != ''
                           ? 'https://mobile.twitter.com/search?q=${UrlConverter.getWordUrlDecode()}'
                           : 'https://mobile.twitter.com');
@@ -281,6 +302,7 @@ class _HomePageWidgetState extends State<HomePageWidget>
                     tooltip: 'Instagram',
                     onPressed: () async {
                       UrlConverter.convertUrl((await _con.currentUrl())!, true);
+                      addWord(UrlConverter.getWordUrlDecode());
                       _con.loadUrl(UrlConverter.getWordUrlDecode() != ''
                           ? 'https://www.instagram.com/explore/tags/${UrlConverter.getWordUrlDecode()}'
                           : 'https://www.instagram.com');
@@ -295,6 +317,7 @@ class _HomePageWidgetState extends State<HomePageWidget>
                     tooltip: 'YouTube',
                     onPressed: () async {
                       UrlConverter.convertUrl((await _con.currentUrl())!, true);
+                      addWord(UrlConverter.getWordUrlDecode());
                       _con.loadUrl(UrlConverter.getWordUrlDecode() != ''
                           ? 'https://m.youtube.com/results?search_query=${UrlConverter.getWordUrlDecode()}'
                           : 'https://m.youtube.com');
@@ -309,6 +332,7 @@ class _HomePageWidgetState extends State<HomePageWidget>
                     tooltip: 'TikTok',
                     onPressed: () async {
                       UrlConverter.convertUrl((await _con.currentUrl())!, true);
+                      addWord(UrlConverter.getWordUrlDecode());
                       _con.loadUrl(UrlConverter.getWordUrlDecode() != ''
                           ? 'https://www.tiktok.com/tag/${UrlConverter.getWordUrlDecode()}'
                           : 'https://www.tiktok.com');
@@ -323,7 +347,7 @@ class _HomePageWidgetState extends State<HomePageWidget>
                       (WebViewController webViewController) async {
                     _con = webViewController;
                     UrlConverter.convertUrl(
-                        _sharedText ?? 'http://follow.cloudns.ph',
+                        _sharedText ?? 'https://follow-service.onrender.com/',
                         true);
                     _con.loadUrl(UrlConverter.link);
                   },
@@ -359,7 +383,7 @@ class _WordRankingDialogState extends State<_WordRankingDialog> {
 
   Future<dynamic> makeRequest() async {
     await http
-        .get(Uri.parse('http://follow.cloudns.ph/api/ranking'))
+        .get(Uri.parse('https://follow-service.onrender.com/api/ranking'))
         .then((response) => {
               if (response.statusCode == 200)
                 setState(() {
