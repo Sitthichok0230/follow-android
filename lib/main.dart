@@ -492,7 +492,7 @@ class _WordSavedDialogState extends State<_WordSavedDialog> {
                                   const EdgeInsets.symmetric(horizontal: 32),
                               title: Text(data[index]),
                               onTap: () async {
-                                Navigator.pop(context, '${data[index]}');
+                                Navigator.pop(context, data[index]);
                               }));
                     })));
   }
