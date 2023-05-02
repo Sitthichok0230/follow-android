@@ -551,6 +551,7 @@ class _WordSavedDialogState extends State<_WordSavedDialog> {
 
   @override
   void dispose() {
+    ScaffoldMessenger.of(context).removeCurrentSnackBar();
     super.dispose();
   }
 
