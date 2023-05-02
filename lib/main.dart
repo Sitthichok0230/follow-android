@@ -536,14 +536,16 @@ class _WordSavedDialogState extends State<_WordSavedDialog> {
             });
           }),
     );
-    WordDatabase.haveWord(UrlConverter.word).then((value) {
-      if (!value && UrlConverter.word.isNotEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      }
-    });
+    if (UrlConverter.word.isNotEmpty) {
+      WordDatabase.haveWord(UrlConverter.word).then((value) {
+        if (!value) {
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        }
+      });
+    }
     WordDatabase.words().then((List<Word> words) => {
           setState(() {
-            data.addAll(words.map((e) => e.word));
+            if (words.isNotEmpty) data.addAll(words.map((e) => e.word));
             data = List.from(data.reversed);
           })
         });
