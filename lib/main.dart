@@ -250,7 +250,6 @@ class _HomePageWidgetState extends State<HomePageWidget>
                             ? 'https://you.com/search?q=แนะนำลิงก์เนื้อหาเว็บไซต์ภาษาไทยหรืออังกฤษที่เกี่ยวข้องกับ $words&tbm=youchat'
                             : 'https://follow-service.onrender.com/');
                         words.clear();
-                        UrlConverter.makeRequestIncreaseScore();
                       }),
                   PopupMenuItem(
                       child: const Text('ล้างคุกกี้'),
@@ -553,7 +552,6 @@ class _WordSavedDialogState extends State<_WordSavedDialog> {
 
   @override
   void dispose() {
-    ScaffoldMessenger.of(context).removeCurrentSnackBar();
     super.dispose();
   }
 
@@ -565,7 +563,10 @@ class _WordSavedDialogState extends State<_WordSavedDialog> {
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             tooltip: 'กลับ',
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              ScaffoldMessenger.of(context).removeCurrentSnackBar();
+              Navigator.pop(context);
+            },
           ),
         ),
         body: data.isEmpty
