@@ -14,22 +14,52 @@ import 'package:http/http.dart' as http;
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:url_launcher/url_launcher.dart' as url_launcher;
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:dynamic_color/dynamic_color.dart';
+import 'package:material_color_utilities/material_color_utilities.dart';
 
 void main() => runApp(const MyApp());
+
+const _brandPurple = Color(0xff6750a4);
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Follow',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        brightness: Brightness.dark,
-      ),
-      home: const HomePageWidget(),
-    );
+    return DynamicColorBuilder(
+        builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+      ColorScheme lightColorScheme;
+      ColorScheme darkColorScheme;
+
+      if (lightDynamic != null && darkDynamic != null) {
+        lightColorScheme = lightDynamic.harmonized();
+        darkColorScheme = darkDynamic.harmonized();
+      } else {
+        lightColorScheme = ColorScheme.fromSeed(
+          seedColor: _brandPurple,
+        );
+        darkColorScheme = ColorScheme.fromSeed(
+          seedColor: _brandPurple,
+          brightness: Brightness.dark,
+        );
+      }
+      return MaterialApp(
+        title: 'Follow',
+        debugShowCheckedModeBanner: false,
+        themeMode: ThemeMode.system,
+        theme: ThemeData(
+          useMaterial3: true,
+          brightness: Brightness.light,
+          colorScheme: lightColorScheme,
+        ),
+        darkTheme: ThemeData(
+          useMaterial3: true,
+          brightness: Brightness.dark,
+          colorScheme: darkColorScheme,
+        ),
+        home: const HomePageWidget(),
+      );
+    });
   }
 }
 
@@ -41,12 +71,6 @@ class HomePageWidget extends StatefulWidget {
   @override
   _HomePageWidgetState createState() => _HomePageWidgetState();
 }
-
-void _showToast(String msg) => Fluttertoast.showToast(
-      msg: msg,
-      toastLength: Toast.LENGTH_SHORT,
-      backgroundColor: Colors.grey,
-    );
 
 class _HomePageWidgetState extends State<HomePageWidget>
     with WidgetsBindingObserver {
@@ -75,8 +99,6 @@ class _HomePageWidgetState extends State<HomePageWidget>
       setState(() {
         _sharedText = value;
       });
-      UrlConverter.convertUrl(
-          _sharedText ?? 'https://follow-service.onrender.com/', true);
       _con.loadUrl(UrlConverter.link);
     });
   }
@@ -93,7 +115,10 @@ class _HomePageWidgetState extends State<HomePageWidget>
     final ConnectivityResult result = await Connectivity().checkConnectivity();
 
     if (result == ConnectivityResult.none) {
-      _showToast('ไม่ได้เชื่อมต่ออินเทอร์เน็ต');
+      Fluttertoast.showToast(
+        msg: 'ไม่ได้เชื่อมต่ออินเทอร์เน็ต',
+        toastLength: Toast.LENGTH_SHORT,
+      );
       SystemNavigator.pop();
     }
   }
@@ -110,14 +135,14 @@ class _HomePageWidgetState extends State<HomePageWidget>
         ));
     if (!mounted) return;
     _con.loadUrl('https://www.google.com/search?q=${result!}');
-    UrlConverter.convertUrl((await _con.currentUrl())!, true);
+    UrlConverter.makeRequestIncreaseScore();
   }
 
   Stream<dynamic> getCurrentUrl() async* {
     await Future.delayed(const Duration(seconds: 2));
     while (true) {
-      UrlConverter.convertUrl((await _con.currentUrl())!, false);
-      yield await WordDatabase.haveWord(UrlConverter.getWordUrlDecode());
+      UrlConverter.convertUrl((await _con.currentUrl())!);
+      yield await WordDatabase.haveWord(UrlConverter.word);
     }
   }
 
@@ -137,7 +162,6 @@ class _HomePageWidgetState extends State<HomePageWidget>
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back,
-            color: Color(0xffffffff),
             size: 25,
           ),
           tooltip: 'ย้อนกลับ',
@@ -152,40 +176,45 @@ class _HomePageWidgetState extends State<HomePageWidget>
                 if (snapshot.hasData && snapshot.data) {
                   return IconButton(
                       icon: const Icon(
-                        Icons.star,
-                        color: Color(0xffffffff),
+                        Icons.bookmark_outlined,
                         size: 25,
                       ),
-                      tooltip: 'ลบ',
+                      tooltip: 'ลบ ${UrlConverter.word}',
                       onPressed: () async {
-                        await WordDatabase.deleteWord(
-                            UrlConverter.getWordUrlDecode());
-                        _showToast('ลบแล้ว');
+                        await WordDatabase.deleteWord(UrlConverter.word).then(
+                            (_) => Fluttertoast.showToast(
+                                msg: 'ลบ ${UrlConverter.word} แล้ว',
+                                toastLength: Toast.LENGTH_SHORT));
                       });
                 } else {
-                  return IconButton(
-                    icon: const Icon(
-                      Icons.star_border,
-                      color: Color(0xffffffff),
-                      size: 25,
-                    ),
-                    tooltip: 'เพิ่ม',
-                    onPressed: () async {
-                      if (UrlConverter.getWordUrlDecode().isNotEmpty) {
-                        await WordDatabase.insertWord(
-                            Word(word: UrlConverter.getWordUrlDecode()));
-                        _showToast('เพิ่มแล้ว');
-                      } else {
-                        _showToast('เพิ่มไม่ได้');
-                      }
-                    },
-                  );
+                  if (UrlConverter.word.isNotEmpty) {
+                    return IconButton(
+                        icon: const Icon(
+                          Icons.bookmark_outline_outlined,
+                          size: 25,
+                        ),
+                        tooltip: 'เพิ่ม ${UrlConverter.word}',
+                        onPressed: () async {
+                          await WordDatabase.insertWord(
+                              Word(word: UrlConverter.word));
+                          Fluttertoast.showToast(
+                              msg: 'เพิ่ม ${UrlConverter.word} แล้ว',
+                              toastLength: Toast.LENGTH_SHORT);
+                        });
+                  } else {
+                    return const IconButton(
+                        icon: Icon(
+                          Icons.bookmark_outline_outlined,
+                          size: 25,
+                        ),
+                        tooltip: 'ไม่พบคำ',
+                        onPressed: null);
+                  }
                 }
               }),
           IconButton(
             icon: const Icon(
               Icons.trending_up_outlined,
-              color: Color(0xffffffff),
               size: 25,
             ),
             tooltip: 'มาแรง',
@@ -194,9 +223,8 @@ class _HomePageWidgetState extends State<HomePageWidget>
           ),
           IconButton(
             icon: const Icon(
-              Icons.saved_search_outlined,
-              color: Color(0xffffffff),
-              size: 25,
+              Icons.bookmarks,
+              size: 20,
             ),
             tooltip: 'คำที่จะค้นหา',
             onPressed: () =>
@@ -205,7 +233,7 @@ class _HomePageWidgetState extends State<HomePageWidget>
           IconButton(
             icon: const Icon(
               Icons.exit_to_app_outlined,
-              color: Color(0xff3ea6ff),
+              color: Colors.blueAccent,
               size: 25,
             ),
             tooltip: 'เปิดในแอป',
@@ -222,8 +250,7 @@ class _HomePageWidgetState extends State<HomePageWidget>
                             ? 'https://you.com/search?q=แนะนำลิงก์เนื้อหาเว็บไซต์ภาษาไทยหรืออังกฤษที่เกี่ยวข้องกับ $words&tbm=youchat'
                             : 'https://follow-service.onrender.com/');
                         words.clear();
-                        UrlConverter.convertUrl(
-                            (await _con.currentUrl())!, true);
+                        UrlConverter.makeRequestIncreaseScore();
                       }),
                   PopupMenuItem(
                       child: const Text('ล้างคุกกี้'),
@@ -251,90 +278,84 @@ class _HomePageWidgetState extends State<HomePageWidget>
                   IconButton(
                     icon: const FaIcon(
                       FontAwesomeIcons.google,
-                      color: Color(0xffaaaaaa),
                       size: 25,
                     ),
                     tooltip: 'Google',
                     onPressed: () async {
-                      UrlConverter.convertUrl((await _con.currentUrl())!, true);
-                      addWord(UrlConverter.getWordUrlDecode());
-                      _con.loadUrl(UrlConverter.getWordUrlDecode() != ''
-                          ? 'https://www.google.com/search?q=${UrlConverter.getWordUrlDecode()}'
+                      UrlConverter.makeRequestIncreaseScore();
+                      addWord(UrlConverter.word);
+                      _con.loadUrl(UrlConverter.word != ''
+                          ? 'https://www.google.com/search?q=${UrlConverter.word}'
                           : 'https://www.google.com');
                     },
                   ),
                   IconButton(
                     icon: const FaIcon(
                       FontAwesomeIcons.facebook,
-                      color: Color(0xffaaaaaa),
                       size: 25,
                     ),
                     tooltip: 'Facebook',
                     onPressed: () async {
-                      UrlConverter.convertUrl((await _con.currentUrl())!, true);
-                      addWord(UrlConverter.getWordUrlDecode());
-                      _con.loadUrl(UrlConverter.getWordUrlDecode() != ''
-                          ? 'https://m.facebook.com/hashtag/${UrlConverter.getWordUrlDecode()}'
+                      UrlConverter.makeRequestIncreaseScore();
+                      addWord(UrlConverter.word);
+                      _con.loadUrl(UrlConverter.word != ''
+                          ? 'https://m.facebook.com/hashtag/${UrlConverter.word}'
                           : 'https://m.facebook.com');
                     },
                   ),
                   IconButton(
                     icon: const FaIcon(
                       FontAwesomeIcons.twitter,
-                      color: Color(0xffaaaaaa),
                       size: 25,
                     ),
                     tooltip: 'Twitter',
                     onPressed: () async {
-                      UrlConverter.convertUrl((await _con.currentUrl())!, true);
-                      addWord(UrlConverter.getWordUrlDecode());
-                      _con.loadUrl(UrlConverter.getWordUrlDecode() != ''
-                          ? 'https://mobile.twitter.com/search?q=${UrlConverter.getWordUrlDecode()}'
+                      UrlConverter.makeRequestIncreaseScore();
+                      addWord(UrlConverter.word);
+                      _con.loadUrl(UrlConverter.word != ''
+                          ? 'https://mobile.twitter.com/search?q=${UrlConverter.word}'
                           : 'https://mobile.twitter.com');
                     },
                   ),
                   IconButton(
                     icon: const FaIcon(
                       FontAwesomeIcons.instagram,
-                      color: Color(0xffaaaaaa),
                       size: 25,
                     ),
                     tooltip: 'Instagram',
                     onPressed: () async {
-                      UrlConverter.convertUrl((await _con.currentUrl())!, true);
-                      addWord(UrlConverter.getWordUrlDecode());
-                      _con.loadUrl(UrlConverter.getWordUrlDecode() != ''
-                          ? 'https://www.instagram.com/explore/tags/${UrlConverter.getWordUrlDecode()}'
+                      UrlConverter.makeRequestIncreaseScore();
+                      addWord(UrlConverter.word);
+                      _con.loadUrl(UrlConverter.word != ''
+                          ? 'https://www.instagram.com/explore/tags/${UrlConverter.word}'
                           : 'https://www.instagram.com');
                     },
                   ),
                   IconButton(
                     icon: const FaIcon(
                       FontAwesomeIcons.youtube,
-                      color: Color(0xffaaaaaa),
                       size: 25,
                     ),
                     tooltip: 'YouTube',
                     onPressed: () async {
-                      UrlConverter.convertUrl((await _con.currentUrl())!, true);
-                      addWord(UrlConverter.getWordUrlDecode());
-                      _con.loadUrl(UrlConverter.getWordUrlDecode() != ''
-                          ? 'https://m.youtube.com/results?search_query=${UrlConverter.getWordUrlDecode()}'
+                      UrlConverter.makeRequestIncreaseScore();
+                      addWord(UrlConverter.word);
+                      _con.loadUrl(UrlConverter.word != ''
+                          ? 'https://m.youtube.com/results?search_query=${UrlConverter.word}'
                           : 'https://m.youtube.com');
                     },
                   ),
                   IconButton(
                     icon: const FaIcon(
                       FontAwesomeIcons.tiktok,
-                      color: Color(0xffaaaaaa),
                       size: 25,
                     ),
                     tooltip: 'TikTok',
                     onPressed: () async {
-                      UrlConverter.convertUrl((await _con.currentUrl())!, true);
-                      addWord(UrlConverter.getWordUrlDecode());
-                      _con.loadUrl(UrlConverter.getWordUrlDecode() != ''
-                          ? 'https://www.tiktok.com/tag/${UrlConverter.getWordUrlDecode()}'
+                      UrlConverter.makeRequestIncreaseScore();
+                      addWord(UrlConverter.word);
+                      _con.loadUrl(UrlConverter.word != ''
+                          ? 'https://www.tiktok.com/tag/${UrlConverter.word}'
                           : 'https://www.tiktok.com');
                     },
                   ),
@@ -347,8 +368,8 @@ class _HomePageWidgetState extends State<HomePageWidget>
                       (WebViewController webViewController) async {
                     _con = webViewController;
                     UrlConverter.convertUrl(
-                        _sharedText ?? 'https://follow-service.onrender.com/',
-                        true);
+                      _sharedText ?? 'https://follow-service.onrender.com/',
+                    );
                     _con.loadUrl(UrlConverter.link);
                   },
                 ),
@@ -396,21 +417,74 @@ class _WordRankingDialogState extends State<_WordRankingDialog> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('มาแรง')),
+      appBar: AppBar(
+        title: const Text('มาแรง'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          tooltip: 'กลับ',
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
       body: FutureBuilder(
           future: makeRequest(),
           builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
             if (!snapshot.hasData) {
               return const Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
-              return const Center(
-                  child: Text(
-                'เกิดข้อผิดพลาด\n\nโปรดลองใหม่อีกครั้ง',
-                textAlign: TextAlign.center,
+              return Center(
+                  child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    size: 100,
+                    color: Color(0xffaaaaaa),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Text(
+                    'เกิดข้อผิดพลาด',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 20,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  TextButton(
+                    onPressed: () async => await makeRequest(),
+                    child: Text(
+                      'โหลดใหม่',
+                      style: TextStyle(
+                        fontSize: 16,
+                      ),
+                    ),
+                  )
+                ],
               ));
             } else if (snapshot.data.length == 0) {
-              return const Center(
-                  child: Text('ไม่มีสถิติการค้นหา 24 ชั่วโมงล่าสุด'));
+              return Center(
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                    Icon(
+                      Icons.trending_up_outlined,
+                      size: 100,
+                      color: Color(0xffaaaaaa),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Text(
+                      'ไม่มีคำค้นหาที่มาแรงในขณะนี้',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 20,
+                      ),
+                    ),
+                  ]));
             } else {
               return RefreshIndicator(
                   onRefresh: () async => await makeRequest(),
@@ -446,6 +520,27 @@ class _WordSavedDialogState extends State<_WordSavedDialog> {
   @override
   void initState() {
     super.initState();
+    final snackBar = SnackBar(
+      content: Text(
+        UrlConverter.word,
+        style: const TextStyle(fontSize: 16),
+      ),
+      behavior: SnackBarBehavior.fixed,
+      action: SnackBarAction(
+          label: "บันทึก",
+          onPressed: () async {
+            await WordDatabase.insertWord(Word(word: UrlConverter.word));
+            setState(() {
+              data.insert(0, UrlConverter.word);
+              data = data;
+            });
+          }),
+    );
+    WordDatabase.haveWord(UrlConverter.word).then((value) {
+      if (!value && UrlConverter.word.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      }
+    });
     WordDatabase.words().then((List<Word> words) => {
           setState(() {
             data.addAll(words.map((e) => e.word));
@@ -462,9 +557,32 @@ class _WordSavedDialogState extends State<_WordSavedDialog> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: const Text('คำที่จะค้นหา')),
-        body: (data.isEmpty)
-            ? const Center(child: Text('ไม่มีคำค้นหา'))
+        appBar: AppBar(
+          title: const Text('คำที่จะค้นหา'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            tooltip: 'กลับ',
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+        body: data.isEmpty
+            ? Center(
+                child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Icon(Icons.bookmarks_outlined,
+                      size: 100, color: Color(0xffaaaaaa)),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Text(
+                    'คำค้นหาที่คุณบันทึกไว้จะปรากฏที่นี่',
+                    style: TextStyle(
+                      fontSize: 20,
+                    ),
+                  )
+                ],
+              ))
             : Scrollbar(
                 child: ListView.builder(
                     padding: const EdgeInsets.symmetric(vertical: 8),
@@ -472,24 +590,24 @@ class _WordSavedDialogState extends State<_WordSavedDialog> {
                     itemBuilder: (context, index) {
                       return Dismissible(
                           key: Key(data[index]),
+                          direction: DismissDirection.endToStart,
                           onDismissed: (DismissDirection dir) async {
                             await WordDatabase.deleteWord(data[index]);
                             setState(() {
                               data.removeAt(index);
+                              data = data;
                             });
-                            _showToast('ลบแล้ว');
                           },
-                          background: Container(
-                              color: Colors.red,
-                              alignment: Alignment.centerLeft,
-                              child: const Icon(Icons.delete)),
                           secondaryBackground: Container(
-                              color: Colors.red,
+                              color: Colors.redAccent,
                               alignment: Alignment.centerRight,
-                              child: const Icon(Icons.delete)),
-                          child: ListTile(
-                              contentPadding:
+                              padding:
                                   const EdgeInsets.symmetric(horizontal: 32),
+                              child: const Icon(Icons.delete_outline_outlined)),
+                          child: ListTile(
+                              leading: const ExcludeSemantics(
+                                  child: Icon(Icons.search_outlined,
+                                      color: Color(0xffaaaaaa))),
                               title: Text(data[index]),
                               onTap: () async {
                                 Navigator.pop(context, data[index]);

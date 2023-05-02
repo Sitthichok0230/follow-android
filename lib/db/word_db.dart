@@ -60,10 +60,10 @@ class WordDatabase {
     );
   }
 
-  static Future<void> deleteWord(String word) async {
+  static Future deleteWord(String word) async {
     final db = await database;
 
-    await db.delete(
+    return await db.delete(
       'words',
       where: 'word = ?',
       whereArgs: [word],

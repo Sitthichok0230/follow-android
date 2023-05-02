@@ -1,6 +1,5 @@
 import 'dart:core';
 
-import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 
@@ -10,22 +9,22 @@ class UrlConverter {
   static final RegExp regex = RegExp(
       r'[(http(s)?):\/\/(www\.)]*?([a-zA-Z0-9@:%_\+~#=]{2,256}\.[a-z(\.a-z)]{2,7})\/\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)');
 
-  static String getWordUrlDecode() {
-    return (Uri.decodeFull(word).replaceAll(RegExp(r'\+'), ' '))
+  static wordUrlDecode() {
+    word = Uri.decodeFull(word)
+        .replaceAll(RegExp(r'\+'), ' ')
         .replaceAll(RegExp(r'#'), '');
   }
 
-  static Future<void> makeRequestIncreaseScore(bool enable) async {
-    if (word.isNotEmpty && enable) {
+  static Future<void> makeRequestIncreaseScore() async {
+    if (word.isNotEmpty) {
       await http
           .put(Uri.parse(
-              'https://follow-service.onrender.com/api/ranking/${getWordUrlDecode()}'))
+              'https://follow-service.onrender.com/api/ranking/$word'))
           .then((res) => {
                 if (res.statusCode != 200)
                   Fluttertoast.showToast(
                     msg: 'เกิดข้อผิดพลาด',
                     toastLength: Toast.LENGTH_SHORT,
-                    backgroundColor: Colors.grey,
                   )
               });
     }
@@ -42,7 +41,7 @@ class UrlConverter {
     }
   }
 
-  static void convertUrl(String url, bool enable) {
+  static void convertUrl(String url) {
     if (url.contains('@')) {
       List<String> path = url.split('@');
       link = url;
@@ -72,7 +71,7 @@ class UrlConverter {
         } else {
           word = service;
         }
-        makeRequestIncreaseScore(enable);
+        wordUrlDecode();
         break;
       case 'google.com':
         if (word.contains('q=') && word.contains('&')) {
@@ -82,7 +81,7 @@ class UrlConverter {
         } else {
           word = "";
         }
-        makeRequestIncreaseScore(enable);
+        wordUrlDecode();
         break;
       case 'facebook.com':
         if (word.contains('people/')) {
@@ -101,7 +100,7 @@ class UrlConverter {
         filterUrlPath();
         word = word.replaceAll(RegExp(r'\.'), ' ');
         word = word.replaceAll(RegExp(r'-'), ' ');
-        makeRequestIncreaseScore(enable);
+        wordUrlDecode();
         break;
       case 'youtube.com':
         if (word.contains('@')) {
@@ -116,7 +115,7 @@ class UrlConverter {
           word = "";
         }
         filterUrlPath();
-        makeRequestIncreaseScore(enable);
+        wordUrlDecode();
         break;
       case 'instagram.com':
         if (word.contains('tags/')) {
@@ -128,7 +127,7 @@ class UrlConverter {
           word = "";
         }
         filterUrlPath();
-        makeRequestIncreaseScore(enable);
+        wordUrlDecode();
         break;
       case 'twitter.com':
         if (word.contains('q=') && word.contains('&')) {
@@ -144,7 +143,7 @@ class UrlConverter {
           word = "";
         }
         filterUrlPath();
-        makeRequestIncreaseScore(enable);
+        wordUrlDecode();
         break;
       case 'tiktok.com':
         url = link;
@@ -161,7 +160,7 @@ class UrlConverter {
           word = "";
         }
         filterUrlPath();
-        makeRequestIncreaseScore(enable);
+        wordUrlDecode();
         break;
       default:
         word = service;
