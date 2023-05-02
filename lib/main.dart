@@ -99,7 +99,7 @@ class _HomePageWidgetState extends State<HomePageWidget>
       setState(() {
         _sharedText = value;
       });
-      _con.loadUrl(UrlConverter.link);
+      _con.loadUrl(_sharedText!);
     });
   }
 
